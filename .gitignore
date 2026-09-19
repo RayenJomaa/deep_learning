@@ -1,0 +1,15 @@
+# Dataset CIFAR-10
+TP1/data/
+
+# Installateur Miniforge
+TP1/Miniforge3-Linux-x86_64.sh
+
+# Modèles générés
+TP1/*.pth
+
+# Logs SLURM
+TP1/logs/
+
+# Python
+__pycache__/
+*.pyc
