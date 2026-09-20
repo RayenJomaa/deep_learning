@@ -328,10 +328,9 @@ et :
 $$
 \frac{\partial q}{\partial y}=-\frac{x}{y^2}
 $$
-
 En appliquant la règle de la chaîne :
 
-$$
+```math
 \frac{\partial f}{\partial x}
 =
 \frac{\partial f}{\partial q}
@@ -340,11 +339,11 @@ $$
 1 \times \frac{1}{4}
 =
 \boxed{0.25}
-$$
+```
 
 Pour $y$ :
 
-$$
+```math
 \frac{\partial f}{\partial y}
 =
 \frac{\partial f}{\partial q}
@@ -355,25 +354,25 @@ $$
 -\frac{2}{16}
 =
 \boxed{-0.125}
-$$
+```
 
 Enfin :
 
-$$
+```math
 \frac{\partial f}{\partial z}
 =
 \boxed{1}
-$$
+```
 
 Les gradients obtenus sont donc :
 
-$$
+```math
 \frac{\partial f}{\partial x}=0.25,
 \qquad
 \frac{\partial f}{\partial y}=-0.125,
 \qquad
 \frac{\partial f}{\partial z}=1
-$$
+```
 
 ### 3.4 Mise à jour des poids
 
