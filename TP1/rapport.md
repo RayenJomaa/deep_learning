@@ -276,29 +276,24 @@ $$ q=\frac{x}{y}=\frac{2}{4}=0.5 $$
 
 puis :
 
-```math
-f=q+z=0.5+0=0.5
-```
+$$ f=q+z=0.5+0=0.5 $$
 
 La sortie est donc :
 
-```math
-\boxed{f=0.5}
-```
+$$ \boxed{f=0.5} $$
 
 #### Backpropagation
 
 On commence par les dérivées de la dernière opération :
 
-```math
-f=q+z
-```
+
+$$ f=q+z $$
+
 
 donc :
 
-```math
-\frac{\partial f}{\partial q}=1
-```
+
+$$ \frac{\partial f}{\partial q}=1 $$
 
 et :
 
