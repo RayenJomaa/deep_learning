@@ -181,7 +181,7 @@ Le MLP considéré possède :
 - 4 neurones dans la couche cachée ;
 - 2 neurones dans la couche de sortie.
 
-![Architecture du MLP](mlp_schema.png)
+![Architecture du MLP](figures/architecture_MLP.png)
 
 #### Nombre de paramètres sans les biais
 
