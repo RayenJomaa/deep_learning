@@ -359,8 +359,7 @@ $$
 \end{aligned}
 $$
 
-<<<<<<< HEAD
-=======
+
 Les gradients obtenus sont donc :
 
 $$
@@ -373,7 +372,6 @@ $$
 }
 $$
 
->>>>>>> 4637a25 (Fixing again rappord.md)
 ### 3.4 Mise à jour des poids
 
 On utilise une étape de descente de gradient avec :
