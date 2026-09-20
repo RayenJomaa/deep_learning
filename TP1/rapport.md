@@ -272,9 +272,7 @@ $$ x=2, \qquad     y=4, \qquad   z=0 $$
 
 on calcule d'abord :
 
-```math
-q=\frac{x}{y}=\frac{2}{4}=0.5
-```
+$$ q=\frac{x}{y}=\frac{2}{4}=0.5 $$
 
 puis :
 
