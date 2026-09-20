@@ -2,12 +2,13 @@
 
 ## TP1 — Premiers pas
 
-**Étudiant :** Mohamed Rayen Jomaa  
+**Étudiant :** Mohamed Rayen Jomaa
+
 **Date :** 17/09/2026
 
 ---
 
-## Exercie 1. Utilisation de SLURM
+## Exercice 1. Utilisation de SLURM
 
 ### 1.1 Mode interactif avec `srun`
 
@@ -110,6 +111,8 @@ Le job s'est terminé correctement avec l'état `COMPLETED`.
 
 Dans mon cas, j'ai demandé **8 Go de RAM** (`ReqMem = 8G`), alors que le processus batch a réellement utilisé au maximum environ **17,6 MiB** (`MaxRSS = 17988K`).
 
+---
+
 ## Exercice 2. Création d'un environnement virtuel Python
 
 ### 2.1 Environnement `deeplearning`
@@ -134,6 +137,7 @@ Résultat :
 Python 3.10.21
 /mnt/hdd/homes/mjomaa/miniforge3/envs/deeplearning/bin/python
 ```
+
 ### 2.2 Vérification de PyTorch et CUDA
 
 J'ai vérifié que PyTorch détecte correctement le GPU avec le script `check_gpu.py`.
@@ -171,6 +175,8 @@ La version installée est :
 
 TensorBoard est donc correctement installé dans l'environnement `deeplearning`.
 
+---
+
 ## Exercice 3. Exercices théoriques
 
 ### 3.1 Architecture et paramètres
@@ -187,21 +193,21 @@ Le MLP considéré possède :
 
 Entre la couche d'entrée et la couche cachée :
 
-$$
+```math
 3 \times 4 = 12
-$$
+```
 
 Entre la couche cachée et la couche de sortie :
 
-$$
+```math
 4 \times 2 = 8
-$$
+```
 
 Le nombre total de paramètres sans les biais est donc :
 
-$$
+```math
 12 + 8 = \boxed{20}
-$$
+```
 
 #### Nombre de paramètres avec les biais
 
@@ -209,9 +215,9 @@ La couche cachée possède 4 biais et la couche de sortie possède 2 biais.
 
 Le nombre total de paramètres est donc :
 
-$$
+```math
 20 + 4 + 2 = \boxed{26}
-$$
+```
 
 ### 3.2 Équations et dimensions
 
@@ -246,15 +252,15 @@ En effet :
 
 On considère la fonction :
 
-$$
+```math
 f(x,y,z)=\frac{x}{y}+z
-$$
+```
 
 On introduit la variable intermédiaire :
 
-$$
+```math
 q=\frac{x}{y}
-$$
+```
 
 Le graphe de calcul est donc :
 
@@ -269,64 +275,65 @@ z ──────────────────┘
 
 Pour :
 
-$$
+```math
 x=2,\qquad y=4,\qquad z=0
-$$
+```
 
 on calcule d'abord :
 
-$$
+```math
 q=\frac{x}{y}=\frac{2}{4}=0.5
-$$
+```
 
 puis :
 
-$$
+```math
 f=q+z=0.5+0=0.5
-$$
+```
 
 La sortie est donc :
 
-$$
+```math
 \boxed{f=0.5}
-$$
+```
 
 #### Backpropagation
 
 On commence par les dérivées de la dernière opération :
 
-$$
+```math
 f=q+z
-$$
+```
 
 donc :
 
-$$
+```math
 \frac{\partial f}{\partial q}=1
-$$
+```
 
 et :
 
-$$
+```math
 \frac{\partial f}{\partial z}=1
-$$
+```
 
 Pour :
 
-$$
+```math
 q=\frac{x}{y}
-$$
+```
 
 on a :
 
-$$
+```math
 \frac{\partial q}{\partial x}=\frac{1}{y}
-$$
+```
 
 et :
 
-$$ \frac{\partial q}{\partial y}=-\frac{x}{y^2} $$
-
+```math
+\frac{\partial q}{\partial y}=-\frac{x}{y^2}
+```
 
 En appliquant la règle de la chaîne :
 
@@ -378,89 +385,89 @@ Les gradients obtenus sont donc :
 
 On utilise une étape de descente de gradient avec :
 
-$$
+```math
 \eta = 1
-$$
+```
 
 Les gradients obtenus précédemment sont :
 
-$$
+```math
 \frac{\partial f}{\partial x}=0.25
-$$
+```
 
-$$
+```math
 \frac{\partial f}{\partial y}=-0.125
-$$
+```
 
-$$
+```math
 \frac{\partial f}{\partial z}=1
-$$
+```
 
 La règle de mise à jour est :
 
-$$
+```math
 \theta' = \theta - \eta \frac{\partial f}{\partial \theta}
-$$
+```
 
 #### Mise à jour de $x$
 
-$$
+```math
 x' = 2 - 1 \times 0.25
-$$
+```
 
-$$
+```math
 \boxed{x'=1.75}
-$$
+```
 
 #### Mise à jour de $y$
 
-$$
+```math
 y' = 4 - 1 \times (-0.125)
-$$
+```
 
-$$
+```math
 \boxed{y'=4.125}
-$$
+```
 
 #### Mise à jour de $z$
 
-$$
+```math
 z' = 0 - 1 \times 1
-$$
+```
 
-$$
+```math
 \boxed{z'=-1}
-$$
+```
 
 La nouvelle sortie est :
 
-$$
+```math
 f'=\frac{x'}{y'}+z'
-$$
+```
 
-$$
+```math
 f'=\frac{1.75}{4.125}-1
-$$
+```
 
-$$
+```math
 f' \approx 0.4242-1
-$$
+```
 
-$$
+```math
 \boxed{f' \approx -0.5758}
-$$
+```
 
 Avant la mise à jour :
 
-$$
+```math
 f=0.5
-$$
+```
 
 Après la mise à jour :
 
-$$
+```math
 f' \approx -0.5758
-$$
+```
 
 La valeur de la fonction a donc bien diminué, ce qui est le comportement attendu lors d'une étape de descente de gradient.
 
@@ -477,11 +484,12 @@ Les mini-batchs offrent un compromis entre l'apprentissage exemple par exemple e
 ### 3.6 Association : sortie et fonction de perte
 
 | Tâche | Fonction finale (sortie) | Fonction de perte |
-|---|---|---|
+| --- | --- | --- |
 | Classification binaire | Sigmoid | Binary Cross-Entropy (BCE) |
 | Classification multiclasse | Softmax | Cross-Entropy |
 | Régression pure | Identité (aucune activation) | MSE (Mean Squared Error) |
 
+---
 
 ## Exercice 4. Premier réseau de neurones
 
@@ -529,9 +537,9 @@ torch.flatten(x, 1)
 
 aplatit chaque image en un vecteur de taille :
 
-$$
+```math
 3 \times 32 \times 32 = 3072
-$$
+```
 
 tout en conservant la première dimension correspondant au batch.
 
@@ -567,7 +575,6 @@ Résultats obtenus :
 
 ```text
 Using device: cuda
-
 Epoch 01 | loss=2.0830 | acc=0.3334
 Epoch 02 | loss=2.1251 | acc=0.3586
 Epoch 03 | loss=2.1198 | acc=0.3682
@@ -588,7 +595,6 @@ L'accuracy d'entraînement atteint environ **42,48 %** à la dixième époque.
 
 `loss.backward()` effectue la rétropropagation et calcule les gradients de la fonction de perte par rapport aux paramètres du modèle.
 
-
 ### 4.4 Évaluation sur le jeu de test
 
 Après l'entraînement, le modèle a été évalué sur le jeu de test CIFAR-10.
@@ -601,9 +607,9 @@ Test accuracy: 0.387
 
 L'accuracy obtenue sur le jeu de test est donc de :
 
-$$
+```math
 \boxed{38.7\%}
-$$
+```
 
 L'accuracy de test est inférieure à l'accuracy d'entraînement, ce qui est attendu puisque le modèle est évalué sur des images qu'il n'a pas utilisées pour apprendre.
 
@@ -615,9 +621,9 @@ Pendant l'évaluation, nous n'avons pas besoin de calculer les gradients puisque
 
 CIFAR-10 possède 10 classes. Un classificateur qui choisit une classe uniformément au hasard aurait donc une accuracy moyenne d'environ :
 
-$$
+```math
 \frac{1}{10} = 0.1 = \boxed{10\%}
-$$
+```
 
 Dans notre expérience, l'accuracy obtenue sur le jeu de test est :
 
@@ -635,6 +641,8 @@ Les poids du modèle entraîné ont été sauvegardés dans le fichier :
 mlp_model.pth
 ```
 
+---
+
 ## Exercice 5. Utilisation de TensorBoard
 
 ### 5.1 Préparation : Split et hyperparamètres
@@ -648,7 +656,6 @@ Cela évite d'écraser les résultats d'un run précédent et permet de comparer
 Les hyperparamètres présents dans `run_name`, comme le `batch_size` ou le `learning rate`, permettent de savoir immédiatement quelle configuration a produit les courbes observées.
 
 La date et l'heure permettent quant à elles de distinguer plusieurs exécutions utilisant éventuellement les mêmes hyperparamètres.
-
 
 ### 5.2 Visualisation avec TensorBoard
 
@@ -667,13 +674,12 @@ La courbe `Loss/train_step` est beaucoup plus bruitée que `Loss/train` car `Los
 
 À l'inverse, `Loss/train` correspond à une moyenne de la perte sur l'ensemble des mini-batchs d'une époque. Cette moyenne réduit les fluctuations et produit donc une courbe beaucoup plus stable.
 
-
 ### 5.3 Mini-sweep d'hyperparamètres et diagnostic d'overfitting
 
 Trois configurations ont été comparées avec TensorBoard :
 
 | Run | Learning rate | Batch size |
-|---|---:|---:|
+| --- | ---: | ---: |
 | Run 1 | 0.01 | 32 |
 | Run 2 | 0.001 | 32 |
 | Run 3 | 0.1 | 128 |
@@ -703,24 +709,23 @@ batch size = 32
 
 soit :
 
-$$
+```math
 \boxed{51.6\%}
-$$
+```
 
 Pour comparaison, le Run 1 atteint environ :
 
-$$
+```math
 \boxed{37.9\%}
-$$
+```
 
 Le Run 3 reste proche de :
 
-$$
+```math
 \boxed{10\%}
-$$
+```
 
 ce qui correspond approximativement aux performances d'un classificateur aléatoire sur CIFAR-10, qui possède 10 classes.
-
 
 #### Diagnostic visuel du sur-apprentissage
 
