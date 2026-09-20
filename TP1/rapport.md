@@ -313,7 +313,7 @@ $$ \frac{\partial q}{\partial y}=-\frac{x}{y^2} $$
 
 En appliquant la règle de la chaîne :
 
-```math
+$$
 \frac{\partial f}{\partial x}
 =
 \frac{\partial f}{\partial q}
@@ -322,8 +322,7 @@ En appliquant la règle de la chaîne :
 1 \times \frac{1}{4}
 =
 \boxed{0.25}
-```
-
+$$
 Pour $y$ :
 
 ```math
