@@ -297,27 +297,19 @@ $$ \frac{\partial f}{\partial q}=1 $$
 
 et :
 
-```math
-\frac{\partial f}{\partial z}=1
-```
+$$ \frac{\partial f}{\partial z}=1 $$
 
 Pour :
 
-```math
-q=\frac{x}{y}
-```
+$$ q=\frac{x}{y} $$
 
 on a :
 
-```math
-\frac{\partial q}{\partial x}=\frac{1}{y}
-```
+$$ \frac{\partial q}{\partial x}=\frac{1}{y} $$
 
 et :
 
-```math
-\frac{\partial q}{\partial y}=-\frac{x}{y^2}
-```
+$$ \frac{\partial q}{\partial y}=-\frac{x}{y^2} $$
 
 En appliquant la règle de la chaîne :
 
