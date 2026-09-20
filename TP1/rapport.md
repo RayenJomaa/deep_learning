@@ -7,7 +7,7 @@
 
 ---
 
-## 1. Utilisation de SLURM
+## Exercie 1. Utilisation de SLURM
 
 ### 1.1 Mode interactif avec `srun`
 
@@ -110,7 +110,7 @@ Le job s'est terminé correctement avec l'état `COMPLETED`.
 
 Dans mon cas, j'ai demandé **8 Go de RAM** (`ReqMem = 8G`), alors que le processus batch a réellement utilisé au maximum environ **17,6 MiB** (`MaxRSS = 17988K`).
 
-## 2. Création d'un environnement virtuel Python
+## Exercice 2. Création d'un environnement virtuel Python
 
 ### 2.1 Environnement `deeplearning`
 
@@ -171,7 +171,7 @@ La version installée est :
 
 TensorBoard est donc correctement installé dans l'environnement `deeplearning`.
 
-## 3. Exercices théoriques
+## Exercice 3. Exercices théoriques
 
 ### 3.1 Architecture et paramètres
 
@@ -359,6 +359,21 @@ $$
 \end{aligned}
 $$
 
+<<<<<<< HEAD
+=======
+Les gradients obtenus sont donc :
+
+$$
+\boxed{
+\frac{\partial f}{\partial x}=0.25,
+\qquad
+\frac{\partial f}{\partial y}=-0.125,
+\qquad
+\frac{\partial f}{\partial z}=1
+}
+$$
+
+>>>>>>> 4637a25 (Fixing again rappord.md)
 ### 3.4 Mise à jour des poids
 
 On utilise une étape de descente de gradient avec :
@@ -468,7 +483,83 @@ Les mini-batchs offrent un compromis entre l'apprentissage exemple par exemple e
 | Régression pure | Identité (aucune activation) | MSE (Mean Squared Error) |
 
 
-### 4.2 Entraînement du modèle
+## Exercice 4. Premier réseau de neurones
+
+### 4.1 Préparation des données
+
+#### Rôle de `batch_size` et `shuffle`
+
+L'argument `batch_size` indique le nombre d'exemples traités simultanément par le modèle avant chaque mise à jour des paramètres. Par exemple, avec :
+
+```python
+batch_size=32
+```
+
+les images sont traitées par groupes de 32.
+
+L'argument `shuffle` indique si l'ordre des exemples doit être mélangé avant chaque parcours du dataset.
+
+Pour l'ensemble d'entraînement, on utilise :
+
+```python
+shuffle=True
+```
+
+afin de présenter les exemples dans un ordre différent à chaque époque. Cela évite que le modèle apprenne des dépendances liées à l'ordre des données et améliore généralement l'entraînement.
+
+Pour l'ensemble de test, on utilise :
+
+```python
+shuffle=False
+```
+
+car le modèle n'est plus entraîné : on cherche seulement à mesurer ses performances. Il n'est donc pas nécessaire de mélanger les exemples, et garder un ordre fixe rend l'évaluation plus reproductible.
+
+### 4.2 Implémentation du réseau
+
+#### Pourquoi utilise-t-on `torch.flatten(x, 1)` ?
+
+Les images CIFAR-10 ont une forme `(batch_size, 3, 32, 32)`, alors qu'une couche linéaire `nn.Linear` attend des vecteurs en entrée.
+
+La commande :
+
+```python
+torch.flatten(x, 1)
+```
+
+aplatit chaque image en un vecteur de taille :
+
+$$
+3 \times 32 \times 32 = 3072
+$$
+
+tout en conservant la première dimension correspondant au batch.
+
+Ainsi, la forme des données passe de :
+
+```text
+(batch_size, 3, 32, 32)
+```
+
+à :
+
+```text
+(batch_size, 3072)
+```
+
+ce qui permet de transmettre correctement les données à la première couche linéaire du MLP.
+
+#### Pourquoi ne faut-il pas appliquer `Softmax` avant `nn.CrossEntropyLoss` ?
+
+Il ne faut pas appliquer `Softmax` à la sortie du réseau avant d'utiliser `nn.CrossEntropyLoss`.
+
+La fonction `nn.CrossEntropyLoss` attend directement les **logits**, c'est-à-dire les sorties brutes de la dernière couche linéaire.
+
+Elle combine déjà en interne une opération de type `LogSoftmax` avec la fonction de perte correspondante.
+
+Ajouter un `Softmax` manuellement serait donc inutile et pourrait rendre le calcul moins stable numériquement.
+
+### 4.3 Entraînement du modèle
 
 Le modèle a été entraîné pendant 10 époques sur le GPU.
 
@@ -498,7 +589,7 @@ L'accuracy d'entraînement atteint environ **42,48 %** à la dixième époque.
 `loss.backward()` effectue la rétropropagation et calcule les gradients de la fonction de perte par rapport aux paramètres du modèle.
 
 
-### 4.3 Évaluation sur le jeu de test
+### 4.4 Évaluation sur le jeu de test
 
 Après l'entraînement, le modèle a été évalué sur le jeu de test CIFAR-10.
 
@@ -536,7 +627,7 @@ Test accuracy: 0.387
 
 soit **38,7 %**.
 
-### 4.4 Sauvegarde du modèle
+### 4.5 Sauvegarde du modèle
 
 Les poids du modèle entraîné ont été sauvegardés dans le fichier :
 
@@ -544,7 +635,22 @@ Les poids du modèle entraîné ont été sauvegardés dans le fichier :
 mlp_model.pth
 ```
 
-### 5.4 Visualisation avec TensorBoard
+## Exercice 5. Utilisation de TensorBoard
+
+### 5.1 Préparation : Split et hyperparamètres
+
+#### Pourquoi inclure la date, l'heure et les hyperparamètres dans `run_name` ?
+
+Inclure la date, l'heure et les hyperparamètres dans le nom du dossier de logs permet d'identifier clairement chaque expérience d'entraînement.
+
+Cela évite d'écraser les résultats d'un run précédent et permet de comparer facilement plusieurs configurations dans TensorBoard.
+
+Les hyperparamètres présents dans `run_name`, comme le `batch_size` ou le `learning rate`, permettent de savoir immédiatement quelle configuration a produit les courbes observées.
+
+La date et l'heure permettent quant à elles de distinguer plusieurs exécutions utilisant éventuellement les mêmes hyperparamètres.
+
+
+### 5.2 Visualisation avec TensorBoard
 
 Dans TensorBoard, j'ai visualisé les métriques suivantes :
 
@@ -553,13 +659,16 @@ Dans TensorBoard, j'ai visualisé les métriques suivantes :
 - `Loss/train_step`
 - `Loss/val`
 
-Pour la courbe `Loss/train_step`, un niveau de smoothing de **0.6** permet de mieux distinguer la tendance générale tout en conservant une partie des variations.
+#### Smoothing de `Loss/train_step`
 
-La courbe `Loss/train_step` est beaucoup plus bruitée que `Loss/train` car elle représente la perte calculée sur des mini-batchs individuels. Les données changent à chaque mini-batch, ce qui entraîne des variations importantes de la perte.
+Pour la courbe `Loss/train_step`, un niveau de smoothing de **0.6** permet de distinguer clairement la tendance générale de la perte tout en conservant suffisamment de variations pour observer le comportement de l'entraînement.
 
-À l'inverse, `Loss/train` correspond à une moyenne calculée sur l'ensemble des données d'entraînement pendant une époque. Elle est donc plus stable et beaucoup moins bruitée.
+La courbe `Loss/train_step` est beaucoup plus bruitée que `Loss/train` car `Loss/train_step` correspond à la perte calculée sur des mini-batchs individuels. Chaque mini-batch contient des exemples différents, ce qui provoque des variations importantes d'une itération à l'autre.
 
-### 5.5 Mini-sweep d'hyperparamètres
+À l'inverse, `Loss/train` correspond à une moyenne de la perte sur l'ensemble des mini-batchs d'une époque. Cette moyenne réduit les fluctuations et produit donc une courbe beaucoup plus stable.
+
+
+### 5.3 Mini-sweep d'hyperparamètres et diagnostic d'overfitting
 
 Trois configurations ont été comparées avec TensorBoard :
 
@@ -569,54 +678,61 @@ Trois configurations ont été comparées avec TensorBoard :
 | Run 2 | 0.001 | 32 |
 | Run 3 | 0.1 | 128 |
 
-Les courbes TensorBoard montrent que la configuration :
+#### Analyse des courbes `Loss/train` et `Loss/val`
+
+Pour le **Run 2** (`lr = 0.001`, `batch_size = 32`), la perte d'entraînement diminue régulièrement au cours des époques. L'apprentissage est stable et l'accuracy de validation augmente progressivement.
+
+Pour le **Run 1** (`lr = 0.01`, `batch_size = 32`), la perte d'entraînement diminue moins efficacement et la perte de validation présente davantage de fluctuations. Les performances en validation restent inférieures à celles du Run 2.
+
+Pour le **Run 3** (`lr = 0.1`, `batch_size = 128`), l'entraînement devient instable : la loss finit par prendre la valeur `NaN` et l'accuracy reste proche de 10 %. Le learning rate est trop élevé, ce qui provoque des mises à jour trop importantes des paramètres et une divergence de l'optimisation.
+
+#### Meilleure accuracy de validation
+
+La meilleure configuration observée est :
 
 ```text
 learning rate = 0.001
 batch size = 32
 ```
 
-obtient les meilleurs résultats.
-
-À la dixième époque, son accuracy de validation atteint environ :
+À la dixième époque, l'accuracy de validation obtenue est d'environ :
 
 ```text
 0.516
 ```
 
-soit environ :
+soit :
 
 $$
 \boxed{51.6\%}
 $$
 
-La configuration avec `lr = 0.01` et `batch_size = 32` atteint une accuracy de validation d'environ :
+Pour comparaison, le Run 1 atteint environ :
 
 $$
 \boxed{37.9\%}
 $$
 
-La configuration avec `lr = 0.1` et `batch_size = 128` est instable. La loss devient `NaN` et l'accuracy reste proche de :
+Le Run 3 reste proche de :
 
 $$
 \boxed{10\%}
 $$
 
-Cette valeur correspond approximativement aux performances d'un classificateur aléatoire sur CIFAR-10.
-
-Le learning rate `0.1` est donc trop élevé : les mises à jour des paramètres sont trop importantes et l'optimisation diverge.
-
-À l'inverse, `lr = 0.001` permet un apprentissage plus stable : la loss d'entraînement diminue régulièrement et l'accuracy de validation augmente au cours des époques.
-
-#### Diagnostic d'overfitting
-
-On peut détecter un overfitting lorsque la loss d'entraînement continue de diminuer alors que la loss de validation commence à augmenter, ou lorsque l'accuracy d'entraînement continue de progresser alors que l'accuracy de validation stagne ou diminue.
-
-Sur les courbes observées ici, la configuration `lr = 0.001` montre encore une amélioration de l'accuracy de validation jusqu'à la fin des 10 époques. Il n'y a donc pas de signe évident d'overfitting important sur cette durée d'entraînement.
+ce qui correspond approximativement aux performances d'un classificateur aléatoire sur CIFAR-10, qui possède 10 classes.
 
 
-### 5.1 Organisation des runs TensorBoard
+#### Diagnostic visuel du sur-apprentissage
 
-Il est important d'inclure la date, l'heure et les hyperparamètres dans le nom du dossier de logs afin de distinguer facilement les différentes expériences.
+Un sur-apprentissage peut être détecté lorsque les courbes d'entraînement et de validation commencent à évoluer dans des directions différentes.
 
-Cela permet d'éviter d'écraser les résultats d'un entraînement précédent et de savoir rapidement quels hyperparamètres ont été utilisés pour chaque run lors de la comparaison dans TensorBoard.
+Typiquement :
+
+- `Loss/train` continue de diminuer ;
+- tandis que `Loss/val` commence à augmenter ou à stagner.
+
+De même, l'accuracy d'entraînement peut continuer à augmenter alors que l'accuracy de validation stagne ou diminue.
+
+Graphiquement, cela se traduit donc par un **écart croissant entre les performances d'entraînement et de validation**.
+
+Dans nos expériences, le Run 2 (`lr = 0.001`) continue à améliorer son accuracy de validation jusqu'à la dixième époque. Sur les 10 époques observées, il n'y a donc pas de signe évident de sur-apprentissage important.
