@@ -332,18 +332,21 @@ $$
 En appliquant la règle de la chaîne :
 
 $$
-\begin{aligned}
 \frac{\partial f}{\partial x}
-&=
+=
 \frac{\partial f}{\partial q}
 \frac{\partial q}{\partial x}
 =
 1 \times \frac{1}{4}
 =
 \boxed{0.25}
-\\[6pt]
+$$
+
+Pour $y$ :
+
+$$
 \frac{\partial f}{\partial y}
-&=
+=
 \frac{\partial f}{\partial q}
 \frac{\partial q}{\partial y}
 =
@@ -352,24 +355,24 @@ $$
 -\frac{2}{16}
 =
 \boxed{-0.125}
-\\[6pt]
-\frac{\partial f}{\partial z}
-&=
-\boxed{1}
-\end{aligned}
 $$
 
+Enfin :
+
+$$
+\frac{\partial f}{\partial z}
+=
+\boxed{1}
+$$
 
 Les gradients obtenus sont donc :
 
 $$
-\boxed{
 \frac{\partial f}{\partial x}=0.25,
 \qquad
 \frac{\partial f}{\partial y}=-0.125,
 \qquad
 \frac{\partial f}{\partial z}=1
-}
 $$
 
 ### 3.4 Mise à jour des poids
