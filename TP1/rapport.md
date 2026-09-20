@@ -268,9 +268,7 @@ z ──────────────────┘
 
 Pour :
 
-```math
-x=2,\qquad y=4,\qquad z=0
-```
+$$ x=2, \qquad     y=4, \qquad   z=0 $$
 
 on calcule d'abord :
 
