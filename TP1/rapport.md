@@ -193,21 +193,18 @@ Le MLP considéré possède :
 
 Entre la couche d'entrée et la couche cachée :
 
-```math
-3 \times 4 = 12
-```
+
+$$ 3 \times 4 = 12 $$
+
 
 Entre la couche cachée et la couche de sortie :
 
-```math
-4 \times 2 = 8
-```
+$$ 4 \times 2 = 8 $$
+
 
 Le nombre total de paramètres sans les biais est donc :
 
-```math
-12 + 8 = \boxed{20}
-```
+$$ 12 + 8 = 20 $$
 
 #### Nombre de paramètres avec les biais
 
@@ -215,9 +212,7 @@ La couche cachée possède 4 biais et la couche de sortie possède 2 biais.
 
 Le nombre total de paramètres est donc :
 
-```math
-20 + 4 + 2 = \boxed{26}
-```
+$$ 20 + 4 + 2 = 26 $$
 
 ### 3.2 Équations et dimensions
 
@@ -252,15 +247,13 @@ En effet :
 
 On considère la fonction :
 
-```math
-f(x,y,z)=\frac{x}{y}+z
-```
+
+$$ f(x,y,z)=\frac{x}{y}+z $$
+
 
 On introduit la variable intermédiaire :
 
-```math
-q=\frac{x}{y}
-```
+$$ q=\frac{x}{y} $$
 
 Le graphe de calcul est donc :
 
