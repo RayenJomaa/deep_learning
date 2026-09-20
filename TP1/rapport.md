@@ -325,9 +325,9 @@ $$
 
 et :
 
-$$
-\frac{\partial q}{\partial y}=-\frac{x}{y^2}
-$$
+$$ \frac{\partial q}{\partial y}=-\frac{x}{y^2} $$
+
+
 En appliquant la règle de la chaîne :
 
 ```math
