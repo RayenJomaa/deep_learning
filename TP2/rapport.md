@@ -501,7 +501,11 @@ La **Precision** mesure la proportion d'exemples réellement positifs parmi tous
 
 Elle est définie par :
 
-$$ text{Precision} = frac{TP}{TP + FP} $$
+```math
+\text{Precision} 
+= 
+\frac{TP}{TP + FP}
+```
 
 avec :
 
@@ -530,11 +534,11 @@ Le **Recall**, également appelé rappel ou sensibilité, mesure la proportion d
 
 Il est défini par :
 
-$$
+```math
 \text{Recall}
 =
 \frac{TP}{TP + FN}
-$$
+```
 
 avec :
 
@@ -550,7 +554,7 @@ Recall = 0.7042
 Le modèle détecte donc environ :
 
 $$
-70.42\%
+{70.42\%
 $$
 
 des patients réellement positifs.
