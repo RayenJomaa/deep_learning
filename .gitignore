@@ -13,3 +13,7 @@ TP1/logs/
 # Python
 __pycache__/
 *.pyc
+
+# TP2
+TP2/data/
+TP2/runs/
