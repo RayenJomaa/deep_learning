@@ -501,11 +501,7 @@ La **Precision** mesure la proportion d'exemples réellement positifs parmi tous
 
 Elle est définie par :
 
-$$
-\text{Precision}
-=
-\frac{TP}{TP + FP}
-$$
+$$ text{Precision} = frac{TP}{TP + FP} $$
 
 avec :
 
