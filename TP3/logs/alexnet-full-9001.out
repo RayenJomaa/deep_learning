@@ -1,0 +1,35 @@
+Début du job 9001 sur le nœud starfighter-slurm-node-08-1
+Wed Oct 14 13:08:21 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 595.84                 Driver Version: 595.84         CUDA Version: 13.2     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA L4                      Off |   00000000:06:10.0 Off |                    0 |
+| N/A   34C    P8             15W /   72W |       0MiB /  23034MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+
+==============================
+Entraînement AlexNet complet sur ImageNet
+==============================
+Chargement d'ImageNet...
+Modèle alexnet initialisé avec 61,100,840 paramètres.
+Epoch [1/50] | Train Loss: 5.6903 (Acc: 0.0449) | Val Loss: 4.7430 (Acc: 0.1134)
+Epoch [2/50] | Train Loss: 4.7358 (Acc: 0.1212) | Val Loss: 4.1073 (Acc: 0.1878)
+Epoch [3/50] | Train Loss: 4.3138 (Acc: 0.1712) | Val Loss: 3.7226 (Acc: 0.2423)
+Epoch [4/50] | Train Loss: 4.0356 (Acc: 0.2076) | Val Loss: 3.4710 (Acc: 0.2814)
+Epoch [5/50] | Train Loss: 3.8368 (Acc: 0.2351) | Val Loss: 3.2997 (Acc: 0.3088)
+Epoch [6/50] | Train Loss: 3.6852 (Acc: 0.2573) | Val Loss: 3.1865 (Acc: 0.3288)
+Epoch [7/50] | Train Loss: 3.5627 (Acc: 0.2752) | Val Loss: 3.0588 (Acc: 0.3458)
+Epoch [8/50] | Train Loss: 3.4643 (Acc: 0.2906) | Val Loss: 2.9512 (Acc: 0.3660)
