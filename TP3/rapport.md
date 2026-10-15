@@ -1,60 +1,33 @@
 # CSC8607 — Introduction au Deep Learning
 
-## TP3 — Réseaux convolutifs
-
-**Étudiant :** Mohamed Rayen Jomaa  
-**Date :** 14/10/2026
+## TP3
 
 ---
 
-# Exercice 1 — Préparation d'ImageNet et augmentation de données
+# Exercice 1 
 
-Le dataset utilisé est ImageNet 2012, contenant 1000 classes.
+## Question 1
 
-Les images d'entraînement sont préparées avec :
+Sans `transforms.Normalize`, l'entraînement reste mathématiquement possible, mais les valeurs données au réseau ne sont plus centrées et mises à une échelle adaptée.
 
-```python
-RandomResizedCrop(227)
-RandomHorizontalFlip()
-ToTensor()
-Normalize(...)
-```
+Cela peut rendre l'optimisation moins stable et ralentir la convergence, car les activations et les gradients peuvent avoir des échelles moins favorables à la descente de gradient.
 
-Pour la validation, les transformations utilisées sont :
-
-```python
-Resize(256)
-CenterCrop(227)
-ToTensor()
-Normalize(...)
-```
-
-## Question 1 — Rôle de la normalisation et risque de data leakage
-
-Sans `transforms.Normalize`, les images restent converties en tenseurs, mais leurs canaux ne sont pas centrés et réduits avec les statistiques d'ImageNet.
-
-La descente de gradient reste possible, mais les entrées ont alors des distributions et des échelles moins bien conditionnées. Les activations et les gradients peuvent donc être moins stables et l'optimisation peut devenir plus lente ou plus difficile.
-
-Les statistiques de normalisation doivent être calculées uniquement sur le jeu d'entraînement.
-
-Si la moyenne et l'écart-type étaient également calculés à partir du jeu de validation, des informations provenant de ce dernier seraient utilisées dans le prétraitement des données d'entraînement. Cela constituerait une fuite de données (`data leakage`) et rendrait l'évaluation moins indépendante.
+Les moyennes et écarts-types doivent être calculés uniquement sur le jeu d'entraînement. Les calculer aussi avec les données de validation introduirait une information provenant de la validation dans le prétraitement du train : ce serait une fuite de données (`data leakage`).
 
 ---
 
-## Question 2 — Pourquoi des transformations différentes pour le train et la validation ?
+## Question 2
 
-Pendant l'entraînement, nous utilisons :
+Pour l'entraînement, nous utilisons :
 
 ```python
 RandomResizedCrop(227)
 RandomHorizontalFlip()
 ```
 
-Ces transformations génèrent différentes versions d'une même image et augmentent artificiellement la diversité des données vues par le modèle.
+Ces transformations sont aléatoires et permettent de présenter au réseau plusieurs variantes des images d'entraînement. Cela augmente la diversité des exemples et limite la mémorisation du dataset.
 
-Elles permettent notamment de limiter la mémorisation des exemples d'entraînement.
-
-Pour la validation, nous utilisons au contraire :
+Pour la validation, nous utilisons :
 
 ```python
 Resize(256)
@@ -63,98 +36,85 @@ CenterCrop(227)
 
 sans transformation aléatoire.
 
-La validation doit être déterministe afin qu'une même image soit évaluée de la même façon à chaque époque. Cela permet de comparer correctement les performances du modèle au cours de l'entraînement.
+La validation reste ainsi déterministe : une image est évaluée de la même manière à chaque époque, ce qui permet de comparer correctement les performances du modèle.
 
 ---
 
-## Question 3 — Exemple où `RandomHorizontalFlip` serait néfaste
+## Question 3
 
-Une symétrie horizontale serait problématique pour une tâche où la distinction gauche/droite détermine la classe.
-
-Par exemple, dans une classification de panneaux routiers :
+Un exemple est la classification de panneaux indiquant une direction :
 
 ```text
 Tourner à gauche
 Tourner à droite
 ```
 
-un `RandomHorizontalFlip` pourrait transformer visuellement un panneau indiquant « gauche » en un panneau indiquant « droite », alors que son label resterait inchangé.
+Un miroir horizontal peut transformer visuellement un panneau « gauche » en panneau « droite », alors que le label reste inchangé.
 
-L'augmentation produirait alors une image avec une étiquette incorrecte.
+Dans ce cas, l'augmentation de données créerait donc un exemple avec une mauvaise étiquette.
 
 ---
 
-# Exercice 2 — Étude du MLP et d'AlexNet
+# Exercice 2
 
-# Question 2.a — MLP baseline
+## Etape 1
 
-Le MLP reçoit une image RGB de taille `227 × 227`.
-
-Après aplatissement, la taille du vecteur d'entrée est :
+### Question 1
+ 
+L'image d'entrée possède :
 
 ```math
 3 \times 227 \times 227 = 154587
 ```
 
-L'architecture utilisée est :
+valeurs.
+
+L'architecture du MLP est donc :
 
 ```text
-154587 → 256 → 256 → 1000
+154587 -> 256 -> 256 -> 1000
 ```
 
-## Nombre de paramètres
+#### Nombre de paramètres
 
-### Première couche
+Pour la première couche :
 
 ```math
 154587 \times 256 = 39574272
 ```
 
-Avec les 256 biais :
+Avec les biais :
 
 ```math
 39574272 + 256 = 39574528
 ```
 
-### Deuxième couche
+Pour la deuxième couche :
 
 ```math
-256 \times 256 = 65536
+256 \times 256 + 256 = 65792
 ```
 
-Avec les 256 biais :
+Pour la couche de sortie :
 
 ```math
-65536 + 256 = 65792
+256 \times 1000 + 1000 = 257000
 ```
 
-### Couche de sortie
-
-```math
-256 \times 1000 = 256000
-```
-
-Avec les 1000 biais :
-
-```math
-256000 + 1000 = 257000
-```
-
-### Total
+On obtient :
 
 | Couche | Poids | Biais | Total |
 | --- | ---: | ---: | ---: |
-| `154587 → 256` | 39 574 272 | 256 | 39 574 528 |
-| `256 → 256` | 65 536 | 256 | 65 792 |
-| `256 → 1000` | 256 000 | 1 000 | 257 000 |
+| `154587 -> 256` | 39 574 272 | 256 | 39 574 528 |
+| `256 -> 256` | 65 536 | 256 | 65 792 |
+| `256 -> 1000` | 256 000 | 1 000 | 257 000 |
 | **Total** | **39 895 808** | **1 512** | **39 897 320** |
 
 Le script PyTorch confirme :
 
 ```text
-Paramètres avec biais  : 39,897,320
-Paramètres sans biais  : 39,895,808
-Nombre total de biais  : 1,512
+Paramètres avec biais : 39 897 320
+Paramètres sans biais : 39 895 808
 ```
 
 La première couche contient :
@@ -166,61 +126,44 @@ La première couche contient :
 
 des paramètres du réseau.
 
-C'est donc bien la première couche linéaire qui concentre plus de 99 % des paramètres du MLP.
+C'est donc cette première couche qui concentre plus de 99 % des paramètres.
+
+### Question 2
+
+Le problème principal est l'utilisation de `flatten`.
+
+L'image 2D est transformée en un grand vecteur, ce qui fait perdre explicitement sa structure spatiale. Le MLP ne profite donc pas naturellement des relations locales entre pixels voisins.
+
+Cela explique pourquoi cette architecture est moins adaptée aux images qu'un réseau convolutif.
 
 ---
 
-## Défaut structurel du MLP sur une image aplatie
+## Etape 2
+### Question 2.b
 
-Le principal défaut ne vient pas uniquement du nombre très élevé de paramètres.
-
-L'opération `flatten` transforme l'image en un simple vecteur et fait perdre explicitement sa structure spatiale.
-
-Deux pixels voisins dans l'image ne sont plus traités différemment de deux pixels très éloignés.
-
-Le modèle ne bénéficie donc pas directement :
-
-- de la localité spatiale ;
-- du partage de poids ;
-- de la structure 2D de l'image.
-
-Cela rend le MLP beaucoup moins adapté à la classification d'images qu'un réseau convolutif.
-
----
-
-# Question 2.b — Analyse d'AlexNet
-
-Les dimensions spatiales successives obtenues sont :
+Les dimensions obtenues dans AlexNet sont :
 
 ```text
 227 × 227
-→ Conv1    : 56 × 56
-→ MaxPool1 : 27 × 27
-→ Conv2    : 27 × 27
-→ MaxPool2 : 13 × 13
-→ Conv3    : 13 × 13
-→ Conv4    : 13 × 13
-→ Conv5    : 13 × 13
-→ MaxPool3 : 6 × 6
+-> Conv1    : 56 × 56
+-> MaxPool1 : 27 × 27
+-> Conv2    : 27 × 27
+-> MaxPool2 : 13 × 13
+-> Conv3    : 13 × 13
+-> Conv4    : 13 × 13
+-> Conv5    : 13 × 13
+-> MaxPool3 : 6 × 6
 ```
 
 Après le dernier pooling :
-
-```text
-256 × 6 × 6
-```
-
-Après aplatissement :
 
 ```math
 256 \times 6 \times 6 = 9216
 ```
 
-## Tableau complet d'AlexNet
+### Tableau complété
 
-La mémoire des activations est calculée pour une image en utilisant des flottants 32 bits, soit 4 octets par valeur.
-
-| Couche | Taille entrée | Filtres / neurones | K | S | P | Taille sortie | Paramètres | Mémoire sortie (KB) |
+| Couche | Taille entrée (C × H × W) | Filtres / neurones | K | S | P | Taille sortie (C × H × W) | Paramètres avec biais | Mémoire sortie (KB) |
 | --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: |
 | Conv1 + ReLU | `3 × 227 × 227` | 64 | 11×11 | 4 | 2 | `64 × 56 × 56` | 23 296 | 784.00 |
 | MaxPool1 | `64 × 56 × 56` | - | 3×3 | 2 | 0 | `64 × 27 × 27` | 0 | 182.25 |
@@ -230,47 +173,22 @@ La mémoire des activations est calculée pour une image en utilisant des flotta
 | Conv4 + ReLU | `384 × 13 × 13` | 256 | 3×3 | 1 | 1 | `256 × 13 × 13` | 884 992 | 169.00 |
 | Conv5 + ReLU | `256 × 13 × 13` | 256 | 3×3 | 1 | 1 | `256 × 13 × 13` | 590 080 | 169.00 |
 | MaxPool3 | `256 × 13 × 13` | - | 3×3 | 2 | 0 | `256 × 6 × 6` | 0 | 36.00 |
-| Flatten + Dropout | `256 × 6 × 6` | `p=0.5` | - | - | - | `9216` | 0 | 36.00 |
+| Flatten + Dropout | `256 × 6 × 6` | - | - | - | - | `9216` | 0 | 36.00 |
 | Linear1 + ReLU + Dropout | `9216` | 4096 | - | - | - | `4096` | 37 752 832 | 16.00 |
 | Linear2 + ReLU | `4096` | 4096 | - | - | - | `4096` | 16 781 312 | 16.00 |
 | Linear3 | `4096` | 1000 | - | - | - | `1000` | 4 097 000 | 3.91 |
 
-La mémoire totale des sorties est :
+La mémoire totale des activations de sortie est d'environ :
 
 ```math
-784
-+182.25
-+546.75
-+126.75
-+253.5
-+169
-+169
-+36
-+36
-+16
-+16
-+3.90625
-=
-2339.15625\ \text{KB}
+2339.16\ \text{KB}
+\approx
+2340\ \text{KB par image}
 ```
 
-soit environ :
+### Répartition des paramètres et des activations
 
-```math
-\boxed{2340\ \text{KB par image}}
-```
-
----
-
-## Où sont concentrés les paramètres et les activations ?
-
-Le nombre total de paramètres d'AlexNet est :
-
-```text
-61 100 840
-```
-
-Les trois couches fully-connected contiennent :
+Les couches fully-connected contiennent :
 
 ```text
 Linear1 : 37 752 832
@@ -284,20 +202,23 @@ soit :
 58631144
 ```
 
-paramètres.
+paramètres sur un total de :
+
+```math
+61100840
+```
 
 Cela représente environ :
 
 ```math
-\frac{58631144}{61100840} \times 100
-\approx 95.96\%
+95.96\%
 ```
 
 des paramètres d'AlexNet.
 
-L'essentiel des **poids** se trouve donc dans le `classifier`, principalement dans les couches `Linear1` et `Linear2`.
+L'essentiel des **poids** se trouve donc dans les couches fully-connected.
 
-À l'inverse, l'essentiel de la mémoire des **activations** se trouve dans les premières couches convolutionnelles, car elles produisent de grandes cartes de caractéristiques.
+À l'inverse, la mémoire des **activations** est surtout importante dans les premières couches convolutionnelles, car les cartes de caractéristiques sont encore grandes.
 
 Par exemple :
 
@@ -306,9 +227,7 @@ Conv1 : 784 KB
 Conv2 : 546.75 KB
 ```
 
----
-
-## Comparaison de la mémoire des activations avec le MLP
+### Comparaison avec le MLP
 
 Pour les sorties des trois couches linéaires du MLP :
 
@@ -318,80 +237,48 @@ Pour les sorties des trois couches linéaires du MLP :
 6048\ \text{octets}
 ```
 
-soit :
+soit environ :
 
 ```math
-\frac{6048}{1024}
-=
 5.91\ \text{KB}
-```
-
-Si l'on inclut également le grand vecteur d'entrée aplati, celui-ci représente environ :
-
-```math
-154587 \times 4 / 1024
-\approx 603.86\ \text{KB}
-```
-
-et le total reste autour de :
-
-```math
-609.76\ \text{KB}
 ```
 
 contre environ :
 
-```text
-2340 KB
+```math
+2340\ \text{KB}
 ```
 
 pour AlexNet.
 
-Le MLP possède beaucoup de paramètres car chaque valeur de l'image est connectée à chaque neurone de la première couche.
+Même si les deux réseaux ont un nombre de paramètres du même ordre de grandeur, leur utilisation de la mémoire est très différente.
 
-AlexNet partage au contraire les poids des filtres convolutionnels, mais produit de nombreuses grandes cartes de caractéristiques intermédiaires.
+Le MLP concentre beaucoup de paramètres dans une grande matrice de poids, mais produit peu d'activations.
 
-Cela explique pourquoi AlexNet peut avoir une mémoire d'activations nettement supérieure alors que les deux réseaux restent du même ordre de grandeur en nombre de paramètres.
-
----
-
-# Question 2.c — Vérification de l'implémentation AlexNet
-
-L'implémentation PyTorch complétée donne :
-
-```text
-Paramètres AlexNet : 61,100,840
-Entrée AlexNet              : (1, 3, 227, 227)
-Sortie après convolutions   : (1, 256, 6, 6)
-Taille après flatten        : 9216
-Sortie finale AlexNet       : (1, 1000)
-```
-
-Ces résultats sont cohérents avec les calculs précédents.
+AlexNet partage les poids de ses filtres convolutifs, mais produit de grandes cartes de caractéristiques intermédiaires, qui occupent davantage de mémoire.
 
 ---
 
-# Exercice 3 — Entraînement, Early Stopping et comparaison rapide
+## Question 2.c
 
-# Question 3.a — MLP vs AlexNet
-
-Les deux réseaux ont été entraînés pendant 10 époques sur un sous-ensemble de :
+L'implémentation PyTorch donne :
 
 ```text
-20 000 images d'entraînement
-5 000 images de validation
+Paramètres AlexNet : 61 100 840
+Sortie après convolutions : (1, 256, 6, 6)
+Taille après flatten : 9216
+Sortie finale : (1, 1000)
 ```
 
-avec :
-
-```text
-learning rate = 1e-4
-batch size = 256
-```
+Ces valeurs sont cohérentes avec les calculs précédents.
 
 ---
 
-## Rôle de `model.train()` et `model.eval()`
+# Exercice 3 
+
+## Question 3.a
+
+### 1. `model.train()` et `model.eval()`
 
 AlexNet contient des couches :
 
@@ -399,33 +286,19 @@ AlexNet contient des couches :
 nn.Dropout(p=0.5)
 ```
 
-Pendant :
+`model.train()` active le Dropout pendant l'entraînement.
 
-```python
-model.train()
-```
+`model.eval()` le désactive pendant la validation.
 
-le Dropout est actif. Une partie des activations est donc aléatoirement mise à zéro pendant l'entraînement.
-
-Pendant :
-
-```python
-model.eval()
-```
-
-le Dropout est désactivé afin d'utiliser l'ensemble du réseau de manière déterministe pendant l'évaluation.
-
-Si `model.eval()` était oublié pendant la validation, le Dropout continuerait à désactiver aléatoirement des neurones.
-
-Les résultats de validation deviendraient alors aléatoires et généralement moins bons, ce qui rendrait les métriques moins fiables.
+Si on oubliait `model.eval()`, le Dropout resterait actif pendant l'évaluation. Certaines activations seraient encore supprimées aléatoirement et les métriques de validation seraient moins stables et moins fiables.
 
 ---
 
-## Valeurs théoriques à l'initialisation
+### 2. Valeurs théoriques à l'initialisation
 
-ImageNet contient 1000 classes équilibrées.
+ImageNet possède 1000 classes.
 
-Un classificateur purement aléatoire possède donc une accuracy théorique de :
+Pour un choix complètement aléatoire, l'accuracy théorique vaut :
 
 ```math
 \frac{1}{1000}
@@ -435,81 +308,81 @@ Un classificateur purement aléatoire possède donc une accuracy théorique de :
 0.1\%
 ```
 
-Pour une prédiction uniforme sur les 1000 classes, la `CrossEntropyLoss` théorique vaut :
+La `CrossEntropyLoss` théorique pour une distribution uniforme vaut :
 
 ```math
 -\log\left(\frac{1}{1000}\right)
 =
 \log(1000)
-\approx 6.9078
+\approx
+6.9078
 ```
 
-### Premières valeurs observées
-
-Pour AlexNet :
+Pour AlexNet, nous avons obtenu à la première époque :
 
 ```text
-Epoch 1
 Train Loss = 6.9080
 Train Acc  = 0.0008
+
 Val Loss   = 6.9059
 Val Acc    = 0.0010
 ```
 
-Ces valeurs correspondent presque exactement aux valeurs théoriques d'une initialisation aléatoire.
+Ces valeurs sont presque identiques aux valeurs théoriques attendues à l'initialisation.
 
 Pour le MLP :
 
 ```text
-Epoch 1
 Train Loss = 7.1932
 Train Acc  = 0.0012
+
 Val Loss   = 7.0085
 Val Acc    = 0.0012
 ```
 
-La loss est légèrement supérieure à `ln(1000)`, mais l'accuracy reste du même ordre de grandeur que la valeur aléatoire théorique.
+L'accuracy reste également du même ordre de grandeur que le choix aléatoire.
 
-Les premiers résultats sont donc cohérents avec l'initialisation des modèles.
+Les premières époques sont donc cohérentes avec les valeurs théoriques.
 
 ---
 
-## Comparaison TensorBoard — MLP vs AlexNet
+### 3. Comparaison entre MLP et AlexNet sur 20 000 images
 
-### Accuracy
+#### Loss
 
-![Accuracy MLP vs AlexNet](figures/TensorBoard_Loss_MLP_vs_AlexNet.png)
+![Loss MLP vs AlexNet](figures/TensorBoard_Loss_MLP_vs_AlexNet.png)
 
-### Loss
+#### Accuracy
 
-![Loss MLP vs AlexNet](figures/TensorBoard_Accuracy_MLP_vs_AlexNet.png)
+![Accuracy MLP vs AlexNet](figures/TensorBoard_Accuracy_MLP_vs_AlexNet.png)
 
-À la dixième époque :
+À l'époque 10 :
 
 | Modèle | Train Loss | Val Loss | Train Accuracy | Val Accuracy |
 | --- | ---: | ---: | ---: | ---: |
 | MLP | 6.7973 | 6.8939 | 0.62 % | 0.42 % |
 | AlexNet | 6.4079 | 6.4746 | 0.98 % | 0.80 % |
 
-AlexNet apprend donc plus rapidement que le MLP sur ce sous-ensemble.
+AlexNet apprend mieux et plus rapidement que le MLP : sa loss diminue davantage et ses accuracies sont supérieures.
 
-Sa loss diminue davantage et ses accuracies d'entraînement et de validation sont supérieures.
+Cela est cohérent avec son architecture convolutive, qui exploite la structure spatiale des images.
 
-Cela s'explique principalement par le fait que les convolutions exploitent directement la structure spatiale et locale des images, alors que le MLP traite chaque image comme un grand vecteur après `flatten`.
+Sur ces 10 époques, aucun des deux modèles ne montre encore un sur-apprentissage très fort.
 
-Sur les 10 époques observées, aucun des deux modèles ne présente encore un sur-apprentissage très marqué : les losses de validation continuent globalement à diminuer.
+Le MLP présente cependant un écart train/validation légèrement plus visible à la fin :
+
+```text
+Train Loss = 6.7973
+Val Loss   = 6.8939
+```
+
+Il est aussi plus exposé au sur-apprentissage sur un petit dataset, car sa première couche contient à elle seule près de 40 millions de paramètres sans exploiter la structure locale des images.
 
 ---
 
-# Question 3.b — AlexNet plus profond
+## Question 3.b - AlexNet plus profond
 
-Une variante d'AlexNet a été créée en ajoutant trois couches convolutionnelles supplémentaires après `Conv5` :
-
-```text
-Conv2d(256, 256, kernel_size=3, padding=1) + ReLU
-Conv2d(256, 256, kernel_size=3, padding=1) + ReLU
-Conv2d(256, 256, kernel_size=3, padding=1) + ReLU
-```
+Nous avons ajouté trois convolutions `3 × 3` supplémentaires après `Conv5`.
 
 Le nombre de paramètres passe de :
 
@@ -518,58 +391,42 @@ AlexNet standard : 61 100 840
 Deep AlexNet     : 62 871 080
 ```
 
-Après 10 époques sur le même sous-ensemble :
+Après 10 époques sur les mêmes 20 000 images :
 
 | Modèle | Train Loss | Val Loss | Train Accuracy | Val Accuracy |
 | --- | ---: | ---: | ---: | ---: |
 | AlexNet standard | 6.4079 | 6.4746 | 0.98 % | 0.80 % |
 | Deep AlexNet | 6.5329 | 6.5937 | 0.56 % | 0.60 % |
 
-Le réseau plus profond présente donc des performances inférieures dès l'entraînement.
+Le réseau plus profond apprend donc moins rapidement.
 
-Cette dégradation ne correspond pas à du sur-apprentissage : dans un cas de sur-apprentissage, les performances sur le train seraient très bonnes tandis que celles sur la validation se dégraderaient.
+Il ne s'agit pas d'un sur-apprentissage, car les performances sur le train sont elles-mêmes moins bonnes que celles d'AlexNet standard.
 
-Ici, même les performances d'entraînement sont moins bonnes.
+On observe plutôt une difficulté d'optimisation, donc un comportement de **sous-apprentissage au début de l'entraînement**.
 
-Il s'agit plutôt d'une difficulté d'optimisation conduisant à du **sous-apprentissage au début de l'entraînement**.
-
-L'ajout de plusieurs couches augmente la longueur du chemin parcouru par le gradient pendant la rétropropagation.
-
-Sans mécanisme comme des connexions résiduelles ou des techniques de normalisation supplémentaires, les gradients doivent traverser davantage de transformations successives. Ils peuvent devenir plus faibles ou moins stables dans les premières couches.
-
-Le réseau plus profond est donc plus difficile à optimiser, même s'il possède théoriquement une capacité plus importante.
+En ajoutant des couches, le gradient doit traverser davantage d'opérations pendant la rétropropagation. Il peut donc s'atténuer avant d'atteindre les premières couches, ce qui ralentit leur mise à jour et rend le démarrage de l'apprentissage plus difficile.
 
 ---
 
-# Exercice 4 — Entraînement long sur ImageNet complet
+# Exercice 4
 
-AlexNet a ensuite été lancé sur l'intégralité du dataset ImageNet avec :
+AlexNet a ensuite été entraîné sur l'intégralité du jeu d'entraînement ImageNet avec :
 
 ```text
 subset_size = None
-num_epochs  = 50
 batch_size  = 256
 GPU         = NVIDIA L4
 ```
 
-Le job Slurm utilisé était :
-
-```text
-Job ID : 9001
-Nom    : alexnet-full
-```
-
-Le job a été volontairement arrêté après avoir obtenu suffisamment d'époques complètes pour réaliser l'analyse demandée.
-
-Au total, **8 époques complètes** ont été obtenues.
+Le job a été arrêté après **8 époques complètes**, ce qui est suffisant pour réaliser l'analyse demandée.
 
 ---
 
-## Profilage temporel
+## 1. Profilage temporel
 
-Les durées mesurées sont :
+Les temps observés sont :
 
-| Époque | Durée |
+| Époque | Temps |
 | ---: | ---: |
 | 1 | 24 min 06 s |
 | 2 | 24 min 04 s |
@@ -580,19 +437,19 @@ Les durées mesurées sont :
 | 7 | 24 min 05 s |
 | 8 | 23 min 54 s |
 
-La durée moyenne d'une époque est d'environ :
+La première époque complète a donc pris exactement :
 
 ```text
-24 min 03 s
+24 min 06 s
 ```
 
-soit environ :
+Sur les huit époques, la moyenne est d'environ :
 
-```math
-24.052\ \text{minutes}
+```text
+24 min 03 s par époque
 ```
 
-À cette vitesse, 100 époques nécessiteraient environ :
+À cette vitesse, pour 100 époques :
 
 ```math
 100 \times 24.052
@@ -600,13 +457,13 @@ soit environ :
 2405.2\ \text{minutes}
 ```
 
-soit :
+soit environ :
 
 ```math
-\boxed{\approx 40.1\ \text{heures}}
+\boxed{40.1\ \text{heures}}
 ```
 
-c'est-à-dire environ :
+c'est-à-dire approximativement :
 
 ```text
 40 h 05 min
@@ -614,13 +471,11 @@ c'est-à-dire environ :
 
 sans Early Stopping.
 
-Cette estimation correspond principalement au temps de la boucle d'entraînement et n'inclut pas précisément tout le surcoût des évaluations de validation.
-
 ---
 
-## Évolution de l'entraînement sur ImageNet complet
+## 2. Évolution sur ImageNet complet
 
-Les résultats obtenus sont :
+Les valeurs obtenues sont :
 
 | Époque | Train Loss | Train Accuracy | Val Loss | Val Accuracy |
 | ---: | ---: | ---: | ---: | ---: |
@@ -633,103 +488,83 @@ Les résultats obtenus sont :
 | 7 | 3.5627 | 27.52 % | 3.0588 | 34.58 % |
 | 8 | 3.4643 | 29.06 % | 2.9512 | 36.60 % |
 
-Entre la première et la huitième époque :
+Les deux losses diminuent régulièrement tandis que les accuracies augmentent.
+
+À l'époque 8, on obtient :
 
 ```text
-Train Loss : 5.6903 → 3.4643
-Val Loss   : 4.7430 → 2.9512
-
-Train Accuracy : 4.49 % → 29.06 %
-Val Accuracy   : 11.34 % → 36.60 %
-```
-
-L'apprentissage reste donc très net pendant les huit premières époques.
-
----
-
-## Comparaison TensorBoard — sous-ensemble vs dataset complet
-
-### Accuracy
-
-![Accuracy AlexNet complet vs sous-ensemble](figures/TensorBoard_Loss_AlexNet_Full_vs_Subset.png)
-
-### Loss
-
-![Loss AlexNet complet vs sous-ensemble](figures/TensorBoard_Accuracy_AlexNet_Full_vs_Subset.png)
-
-Sur le sous-ensemble de 20 000 images, après 10 époques :
-
-```text
-Train Loss = 6.4079
-Val Loss   = 6.4746
-
-Train Accuracy = 0.98 %
-Val Accuracy   = 0.80 %
-```
-
-Sur ImageNet complet, dès l'époque 7 :
-
-```text
-Train Loss = 3.5627
-Val Loss   = 3.0588
-
-Train Accuracy = 27.52 %
-Val Accuracy   = 34.58 %
-```
-
-et à l'époque 8 :
-
-```text
-Train Loss = 3.4643
-Val Loss   = 2.9512
-
 Train Accuracy = 29.06 %
 Val Accuracy   = 36.60 %
 ```
 
-Le réseau généralise donc beaucoup mieux lorsqu'il dispose de l'ensemble des données.
-
-Sur le petit sous-ensemble, le nombre d'exemples est faible par rapport à la capacité du réseau. Le modèle peut plus facilement s'adapter aux exemples disponibles et commencer à créer un écart entre entraînement et validation.
-
-Avec environ 1,28 million d'images, le réseau rencontre une diversité beaucoup plus importante d'exemples.
-
-Le sur-apprentissage est donc beaucoup plus faible, car le modèle ne peut pas mémoriser aussi facilement l'ensemble du dataset.
-
-La Data Augmentation et le Dropout renforcent également cet effet de régularisation.
+L'apprentissage est donc encore clairement en progression.
 
 ---
 
-## Pourquoi `Loss/Validation` est-elle inférieure à `Loss/Train` ?
+### Comparaison avec le sous-ensemble de 20 000 images
 
-Pendant les premières époques du training complet, nous observons par exemple :
+#### Loss
+
+![Loss AlexNet complet vs sous-ensemble](figures/TensorBoard_Loss_AlexNet_Full_vs_Subset.png)
+
+#### Accuracy
+
+![Accuracy AlexNet complet vs sous-ensemble](figures/TensorBoard_Accuracy_AlexNet_Full_vs_Subset.png)
+
+Sur le sous-ensemble de 20 000 images, à l'époque 10 :
 
 ```text
-Epoch 1
+Train Loss = 6.4079
+Val Loss   = 6.4746
+```
+
+On commence à avoir :
+
+```math
+\text{Loss}_{val} > \text{Loss}_{train}
+```
+
+avec un petit écart entre train et validation.
+
+Sur ImageNet complet, par exemple à l'époque 8 :
+
+```text
+Train Loss = 3.4643
+Val Loss   = 2.9512
+```
+
+Le sur-apprentissage est beaucoup moins visible sur le dataset complet.
+
+La raison principale est la quantité de données : AlexNet dispose d'environ **1,28 million d'images d'entraînement** au lieu de seulement 20 000.
+
+Avec beaucoup plus d'exemples différents, il est plus difficile pour le réseau de simplement mémoriser les données d'entraînement.
+
+L'augmentation de données et le Dropout limitent également le sur-apprentissage.
+
+---
+
+## 3. Pourquoi la `Loss/Validation` est-elle inférieure à la `Loss/Train` ?
+
+Nous observons par exemple à l'époque 1 :
+
+```text
 Train Loss = 5.6903
 Val Loss   = 4.7430
 ```
 
-La loss de validation est donc nettement inférieure à celle de l'entraînement.
+Deux éléments du code expliquent principalement ce résultat.
 
-Ce résultat s'explique notamment par deux différences techniques entre les phases d'entraînement et de validation.
+### Dropout
 
-### 1. Dropout
-
-Pendant l'entraînement :
+Pendant le train :
 
 ```python
 model.train()
 ```
 
-active les couches :
+le Dropout est actif.
 
-```python
-nn.Dropout(p=0.5)
-```
-
-Une partie des activations est donc aléatoirement désactivée.
-
-Le problème d'apprentissage est volontairement rendu plus difficile, ce qui augmente la loss d'entraînement.
+Une partie des activations est donc supprimée aléatoirement, ce qui rend volontairement l'apprentissage plus difficile.
 
 Pendant la validation :
 
@@ -737,59 +572,47 @@ Pendant la validation :
 model.eval()
 ```
 
-désactive le Dropout.
+le Dropout est désactivé et le réseau utilise toutes ses activations.
 
-Le réseau utilise alors toutes ses activations, ce qui peut réduire la loss de validation.
+La loss de validation peut donc être plus faible.
 
-### 2. Data Augmentation
+### Data Augmentation
 
-Les images d'entraînement utilisent :
+Pendant l'entraînement, les images subissent :
 
 ```python
 RandomResizedCrop(227)
 RandomHorizontalFlip()
 ```
 
-Le modèle reçoit donc des images modifiées aléatoirement et parfois plus difficiles à classifier.
+Les images vues par le réseau sont donc modifiées aléatoirement et peuvent être plus difficiles à classifier.
 
-Les images de validation utilisent au contraire :
+La validation utilise au contraire :
 
 ```python
 Resize(256)
 CenterCrop(227)
 ```
 
-sans augmentation aléatoire.
+de façon déterministe.
 
-La validation est donc effectuée sur des images plus régulières et déterministes.
-
-Ces deux mécanismes expliquent pourquoi, pendant les premières époques, nous pouvons observer :
+Ces deux différences expliquent pourquoi on peut observer au début :
 
 ```math
-\text{Loss}_{validation}
+\text{Loss}_{Validation}
 <
-\text{Loss}_{train}
+\text{Loss}_{Train}
 ```
 
-sans qu'il s'agisse d'une anomalie.
+sans qu'il s'agisse d'une erreur.
 
 ---
 
-# Conclusion
+# Bilan
 
-Les expérimentations montrent que l'architecture convolutionnelle AlexNet est nettement mieux adaptée aux images que le MLP utilisant un simple aplatissement.
+Sur les expériences réalisées :
 
-Sur le sous-ensemble de 20 000 images, AlexNet apprend plus rapidement que le MLP.
-
-L'ajout naïf de trois couches convolutionnelles supplémentaires ne permet pas d'améliorer les résultats : le réseau plus profond est plus difficile à optimiser et démarre plus lentement.
-
-Enfin, l'entraînement sur ImageNet complet montre une très forte amélioration des performances par rapport au petit sous-ensemble :
-
-```text
-Époque 8
-Train Accuracy = 29.06 %
-Val Accuracy   = 36.60 %
-Val Loss       = 2.9512
-```
-
-Une époque complète sur NVIDIA L4 nécessite environ `24 min 03 s`, ce qui correspond à environ `40 h 05 min` pour 100 époques en extrapolation simple, sans Early Stopping.
+- AlexNet apprend mieux que le MLP sur les images ;
+- augmenter simplement la profondeur d'AlexNet rend ici le début de l'optimisation plus difficile ;
+- sur ImageNet complet, les performances progressent fortement et le sur-apprentissage est beaucoup moins visible que sur le sous-ensemble de 20 000 images ;
+- une époque d'entraînement sur ImageNet complet prend environ `24 min 03 s` sur la NVIDIA L4.
