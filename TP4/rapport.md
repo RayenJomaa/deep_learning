@@ -356,9 +356,9 @@ RNN : 467295
 
 Un LSTM contient quatre transformations principales :
 
-- forget gate ;
-- input gate ;
-- output gate ;
+- forget gate 
+- input gate 
+- output gate 
 - candidat de l'état de cellule.
 
 Pour chaque transformation, il faut les mêmes types de poids et biais que dans un RNN simple.
@@ -562,7 +562,7 @@ h_n
 
 ---
 
-# Exercice 3 - Entraînement, dynamique des gradients et comparaison RNN / LSTM
+# Exercice 3
 
 Nous avons réalisé les trois expériences demandées sur :
 
@@ -901,7 +901,7 @@ Pour que l'accuracy elle-même ignore aussi le padding, il faudrait également m
 
 ---
 
-# Exercice 4 - Génération musicale, température et job Slurm
+# Exercice 4
 
 ## 4.a - Génération avec propagation de l'état caché
 
@@ -1345,20 +1345,20 @@ L'idée est de déplacer toutes les notes d'un même nombre de demi-tons.
 
 Par exemple, avec une transposition de `+2` demi-tons, une mélodie conserve :
 
-- son rythme ;
-- ses intervalles relatifs ;
-- sa structure ;
-- ses mesures ;
+- son rythme 
+- ses intervalles relatifs 
+- sa structure 
+- ses mesures 
 
 mais elle est jouée dans une tonalité différente.
 
 Pour l'implémenter au format ABC, il faudrait :
 
-1. détecter les symboles représentant les notes ;
-2. convertir chaque note en hauteur musicale ;
-3. ajouter ou retirer le nombre de demi-tons choisi ;
-4. reconstruire la notation ABC correspondante ;
-5. conserver les durées, mesures, silences et répétitions ;
+1. détecter les symboles représentant les notes 
+2. convertir chaque note en hauteur musicale 
+3. ajouter ou retirer le nombre de demi-tons choisi 
+4. reconstruire la notation ABC correspondante 
+5. conserver les durées, mesures, silences et répétitions 
 6. modifier également l'en-tête `K:` afin d'indiquer la nouvelle tonalité.
 
 Par exemple, une transposition correcte ne doit pas simplement remplacer toutes les lettres caractère par caractère, car il faut aussi gérer :
