@@ -990,17 +990,11 @@ les différences entre les logits sont fortement amplifiées.
 
 La probabilité se concentre alors presque entièrement sur le caractère ayant le logit maximal.
 
-On se rapproche donc d'un :
+On se rapproche donc d'un **greedy decoding**, c'est-à-dire du choix :
 
-```text
-greedy decoding
+```math
+\mathrm{argmax}(z)
 ```
-
-c'est-à-dire du choix :
-
-$$
-\operatorname{argmax}(z)
-$$`
 
 La génération devient plus déterministe mais également plus répétitive.
 
