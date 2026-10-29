@@ -998,9 +998,9 @@ greedy decoding
 
 c'est-à-dire du choix :
 
-```math
+$$
 \operatorname{argmax}(z)
-```
+$$`
 
 La génération devient plus déterministe mais également plus répétitive.
 
